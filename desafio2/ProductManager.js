@@ -119,19 +119,19 @@ class ProductManager {
     }
 }
 
-
+//Testing Functions
 
 async function testAddProduct() {
     const productManager = new ProductManager();
 
   
     await productManager.addProduct({
-        title: 'Title 3',
-        description: 'Description 3',
+        title: 'Title 5',
+        description: 'Description 5',
         price: 123,
         thumbnail: 'No photo',
-        code: 'jkl',
-        stock: 5
+        code: 'yhn',
+        stock: 35
     } );
 }
 
