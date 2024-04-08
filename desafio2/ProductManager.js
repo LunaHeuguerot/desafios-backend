@@ -1,6 +1,6 @@
-import { promises as fs} from 'fs';
+import fs from 'fs/promises'
 
-export class ProductManager {
+class ProductManager {
     constructor() {
         this.products = [];
         this.path = 'products.json';
@@ -24,8 +24,8 @@ export class ProductManager {
         return lastProductId;
     }
 
-    addProduct(product){
-        this.getProducts();
+    async addProduct(product){
+        await this.getProducts();
         const { title, description, price, thumbnail, code, stock } = product;
 
         if(!title || !description || !price || !thumbnail || !code || !stock){
@@ -41,19 +41,22 @@ export class ProductManager {
         const id = this.setId();
         this.products.push({ id, ...product });
 
+        const data = JSON.stringify(this.products, null, 2);
+
         try {
-            fs.writeFile(this.path, JSON.stringify(this.products));
+            await fs.writeFile(this.path, data);
             console.log('Datos guardados exitosamente');
         } catch (error) {
             console.error('Error al escribir el archivo', error);
         }
     }
 
-    getProducts(){
+    async getProducts(){
         try {
-            const data = fs.readFile(this.path, 'utf8');
+            const data = await fs.readFile(this.path, 'utf-8');
             this.products = JSON.parse(data);
             console.log('Archivo leído exitosamente');
+            return this.products
         } catch (error) {
             if(error.code === 'ENOENT'){
                 console.error('El archivo no existe');
@@ -115,4 +118,72 @@ export class ProductManager {
         }
     }
 }
+
+
+
+async function testAddProduct() {
+    const productManager = new ProductManager();
+
+  
+    await productManager.addProduct({
+        title: 'Title 3',
+        description: 'Description 3',
+        price: 123,
+        thumbnail: 'No photo',
+        code: 'jkl',
+        stock: 5
+    } );
+}
+
+async function testGetProducts() {
+    const productManager = new ProductManager();
+    const products = await productManager.getProducts();
+    console.log(products);
+}
+
+async function testGetProductById() {
+    const productManager = new ProductManager();
+    try {
+        await productManager.getProducts();
+        const product = await productManager.getProductById(2); 
+        if (product) {
+            console.log("Producto encontrado:", product); 
+        } else {
+            console.log("No se encontró ningún producto con el ID dado.");
+        }
+    } catch (error) {
+        console.error(error.message);
+    }
+}
+
+async function testUpdateProduct() {
+    const productManager = new ProductManager();
+    try {
+        await productManager.getProducts();
+     
+        await productManager.updateProduct(1, {
+            "title": "Updated Prod 1",
+            "description": "Description 1",
+            "price": 150,
+            "thumbnail": "No photo",
+            "code": "abc",
+            "stock": 10
+          });
+        console.log("Producto actualizado correctamente");
+    } catch (error) {
+        console.error("Error al actualizar el producto:", error.message);
+    }
+}
+
+async function testDeleteProduct() {
+    const productManager = new ProductManager();
+    try {
+        await productManager.getProducts()
+        await productManager.deleteProduct(2);
+    } catch (error) {
+        console.error(error.message);
+    }
+}
+
+
 
